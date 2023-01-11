@@ -48,12 +48,17 @@ zeitstrahl = document.getElementById('zeitstrahl');
 x = 0;
 y = 0;
 
+xVelocity = 0;
+
+lastMousePosition = {x: 0, y: 0};
+
 akerX = 0;
 ankerY = 0;
 
 lastFrameMouseDown = false;
 
 scale = 1;
+scaleGoal = 1;
 
 minScale = 1;
 maxScale = 1000;
@@ -81,7 +86,20 @@ titleElement = document.getElementById('title');
 descriptionElement = document.getElementById('description');
 
 const snapDistance = 30;
+
+lastFrameScale = scale;
+
 function update() {
+    if(Math.abs(lastFrameMouseDown - mouse.down) > 0.5) {
+        xVelocity = mouse.x - lastMousePosition.x;
+    }
+
+    //slow down the velocity
+    xVelocity *= 0.9;
+
+    //update x by the velocity
+    x += xVelocity;
+
     //move the timeline with the mouse
     if (mouse.down) {
         if (!lastFrameMouseDown) {
@@ -111,18 +129,24 @@ function update() {
 
     //zoom the timeline with the mouse wheel
     if (mouse.scroll != 0) {
-        scale -= mouse.scroll / 1000;
-        if (scale < minScale) {
-            scale = minScale;
+        scaleGoal -= mouse.scroll / 1000;
+        if (scaleGoal < minScale) {
+            scaleGoal = minScale;
         }
-        if (scale > maxScale) {
-            scale = maxScale;
+        if (scaleGoal > maxScale) {
+            scaleGoal = maxScale;
         }
     }
 
-    //todo: correct the position of the timeline when zooming so that the mouse is still over the same point
+    //smoothly zoom the timeline
+    scaleDiff = scaleGoal - scale;
+    if (Math.abs(scaleDiff) < 0.01) {scaleDiff = 0.01 * Math.sign(scaleDiff);}
+    scale += scaleDiff / 10;
+    if (Math.abs(scaleGoal - scale) < 0.001) {scale = scaleGoal;}
 
     mouse.scroll = 0;
+    lastMousePosition.x = mouse.x;
+    lastMousePosition.y = mouse.y;
 }
 
 dates = [];
@@ -268,6 +292,7 @@ function draw() {
     descriptionElement.innerHTML = d == null ? "" : d.description;
     titleElement.innerHTML = d == null ? "" : d.title;
 
+    lastFrameScale = scale;
     window.requestAnimationFrame(draw);
 }
 
