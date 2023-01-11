@@ -58,6 +58,22 @@ scale = 1;
 minScale = 1;
 maxScale = 10;
 
+dataPointSize = 10;
+verticalLineSize = 20;
+
+fontSize_title = 20;
+fontSize_year = 20;
+
+colors = {
+    datapoint: 'red',
+    verticalLine: 'black',
+    title: 'black',
+    year: 'black'
+}
+
+titleElement = document.getElementById('title');
+descriptionElement = document.getElementById('description');
+
 const snapDistance = 30;
 function update() {
     //move the timeline with the mouse
@@ -115,7 +131,6 @@ dates.push( new datapoint(new Date(2022, 2, 10), 'letztes datum', 'dies ist das 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //draw the timeline image
-    //ctx.drawImage(zeitstrahl, x, y, canvas.width * scale, (canvas.width / 2.687) * scale);
 
     //draw timeline
     ctx.beginPath();
@@ -129,30 +144,56 @@ function draw() {
     let lastDate = dates[dates.length - 1].date - -20000000000; //add 20000000000 for the same reason. double minus to make it positive. + doesnt work bc javascript is stupid and doesnt know how to add numbers and strings :/
     let difference = lastDate - firstDate;
 
+    //draw vertical lines for each year
+    let year = dates[0].date.getFullYear();
+    let positionPercentage = 0;
+    let yOffset = 0;
+    while (year <= dates[dates.length - 1].date.getFullYear()) {
+        positionPercentage = (new Date(year, 0, 1) - firstDate) / difference;
+        ctx.beginPath();
+        ctx.moveTo(canvas.width * positionPercentage + x, canvas.height / 2 - verticalLineSize);
+        ctx.lineTo(canvas.width * positionPercentage + x, canvas.height / 2 + verticalLineSize);
+        ctx.stroke();
+        
+        //draw the year
+        ctx.font = fontSize_year + "px Arial";
+        yOffset = verticalLineSize + fontSize_year;
+        ctx.fillStyle = colors.year;
+        ctx.fillText(year, canvas.width * positionPercentage + x - ((fontSize_year / 5) * year.toString().length), canvas.height / 2 + yOffset);
+
+        year++;
+    }
+
+
     //draw each datapoint on the timeline based on its date
     for (let i = 0; i < dates.length; i++) {
         positionPercentage = (dates[i].date - firstDate) / difference;
         ctx.beginPath();
-        ctx.arc(canvas.width * positionPercentage + x, canvas.height / 2, 10, 0, 2 * Math.PI);
-        ctx.stroke();
+        ctx.arc(canvas.width * positionPercentage + x - dataPointSize / 2, canvas.height / 2, dataPointSize, 0, 2 * Math.PI);
+        ctx.fillStyle = colors.datapoint;
+        ctx.fill();
 
         //draw the title of the datapoint
-        fontSize = 20;
-        ctx.font = fontSize + "px Arial";
-        yOffset = dates[i].position == "top" ? -20 : 20 + fontSize / 2;
-        
-        ctx.fillText(dates[i].title, canvas.width * positionPercentage + x - ((fontSize / 5) * dates[i].title.length), canvas.height / 2 + yOffset);
+        ctx.font = fontSize_title + "px Arial";
+        yOffset = dates[i].position == "top" ? -20 - verticalLineSize / 2: 20 + verticalLineSize + fontSize_title / 2 + fontSize_year / 2 + 10;
+        ctx.fillStyle = colors.title;
+        ctx.fillText(dates[i].title, canvas.width * positionPercentage + x - ((fontSize_title / 5) * dates[i].title.length), canvas.height / 2 + yOffset);
     }
     
-    // if the mouse is over a datapoint, draw a tooltip
+    // if the mouse is over a datapoint, draw it's description and title on the top of the screen
+    d = null;
     for (let i = 0; i < dates.length; i++) {
         positionPercentage = (dates[i].date - firstDate) / difference;
-        if (mouse.x > canvas.width * positionPercentage + x - 10 && mouse.x < canvas.width * positionPercentage + x + 10 && mouse.y > canvas.height / 2 - 10 && mouse.y < canvas.height / 2 + 10) {
-            ctx.beginPath();
-            ctx.rect(mouse.x, mouse.y, 100, 100);
-            ctx.stroke();
+        xPos = canvas.width * positionPercentage + x;
+        if (mouse.x > xPos - dataPointSize && 
+            mouse.x < xPos + dataPointSize && 
+            mouse.y > canvas.height / 2 - dataPointSize && 
+            mouse.y < canvas.height / 2 + dataPointSize) {
+           d = dates[i];
         }
     }
+    descriptionElement.innerHTML = d == null ? "" : d.description;
+    titleElement.innerHTML = d == null ? "" : d.title;
     
     window.requestAnimationFrame(draw);
 }
