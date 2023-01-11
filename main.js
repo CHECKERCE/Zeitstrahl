@@ -124,7 +124,7 @@ dates = [];
 
 dates.push( new datapoint(new Date(2001, 4, 12), 'test1', 'test1'));
 dates.push( new datapoint(new Date(2002, 9, 12), 'Julian', 'An diesem tag wurde Julian geboren'));
-dates.push( new datapoint(new Date(2008, 9, 12), '| laaaaangerrrr Titelllll |', 'An diesem tag war das datum 12.09.2008', "bottom")); 
+dates.push( new datapoint(new Date(2008, 9, 12), '| laaaaangerrrr Titelllll |', 'An diesem tag war das datum 12.09.2008', "bottom"));
 dates.push( new datapoint(new Date(2020, 1, 1), 'deine mom', 'tolle beschreibung alla'));
 dates.push( new datapoint(new Date(2022, 2, 10), 'letztes datum', 'dies ist das letzte test datum'));
 
@@ -143,6 +143,10 @@ function draw() {
     let firstDate = dates[0].date - 20000000000;    //subtract 20000000000 to make sure the first datapoint is not on the edge of the timeline
     let lastDate = dates[dates.length - 1].date - -20000000000; //add 20000000000 for the same reason. double minus to make it positive. + doesnt work bc javascript is stupid and doesnt know how to add numbers and strings :/
     let difference = lastDate - firstDate;
+
+
+    //apply the scale by dividing the difference by the scale. also translate the timeline so the mouse is still over the same point
+    difference /= scale;
 
     //draw vertical lines for each year
     let year = dates[0].date.getFullYear();
@@ -194,7 +198,7 @@ function draw() {
     }
     descriptionElement.innerHTML = d == null ? "" : d.description;
     titleElement.innerHTML = d == null ? "" : d.title;
-    
+
     window.requestAnimationFrame(draw);
 }
 
