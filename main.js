@@ -1,0 +1,87 @@
+mouse = {
+    x: 0,
+    y: 0,
+    down: false,
+}
+
+keys = [];
+
+window.addEventListener('keydown', function(e) {
+    keys[e.keyCode] = true;
+});
+
+window.addEventListener('keyup', function(e) {
+    keys[e.keyCode] = false;
+});
+
+window.addEventListener('mousemove', function(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+window.addEventListener('mousedown', function(e) {
+    mouse.down = true;
+});
+
+window.addEventListener('mouseup', function(e) {
+    mouse.down = false;
+});
+
+zeitstrahl = document.getElementById('zeitstrahl');
+
+x = 0;
+y = 0;
+
+akerX = 0;
+ankerY = 0;
+
+lastFrameMouseDown = false;
+
+scale = 1;
+
+function update() {
+    if (mouse.down) {
+        if (!lastFrameMouseDown) {
+            ankerX = mouse.x - x;
+            ankerY = mouse.y - y;
+        }
+        x = mouse.x - ankerX;
+        y = mouse.y - ankerY;
+        lastFrameMouseDown = true;
+    } else {
+        lastFrameMouseDown = false;
+    }
+
+    up = keys[38];
+    down = keys[40];
+
+    zeitstrahlAnker = zeitstrahl.getBoundingClientRect();
+
+    mouseOnZeitstrahlX = mouse.x - zeitstrahlAnker.left;
+    mouseOnZeitstrahlY = mouse.y - zeitstrahlAnker.top;
+
+    if (up) {
+        scale += 0.01;
+    }
+    if (down) {
+        scale -= 0.01;
+    }
+
+    zeitstrahlAnker = zeitstrahl.getBoundingClientRect();
+    mouseOnZeitstrahlXNew = mouse.x - zeitstrahlAnker.left;
+    mouseOnZeitstrahlYNew = mouse.y - zeitstrahlAnker.top;
+
+    x += mouseOnZeitstrahlX - mouseOnZeitstrahlXNew;
+    y += mouseOnZeitstrahlY - mouseOnZeitstrahlYNew;
+
+
+    
+
+    
+
+    
+
+    zeitstrahl.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
+}
+
+setInterval(update, 1000 / 60);
