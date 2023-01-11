@@ -1,7 +1,19 @@
 class datapoint {
-    constructor(date, title, description) {
+    date = null;
+    title = "";
+    description = "";
+    position = "top";
+
+    constructor(date, title, description, position) {
         this.date = date;
-        this.title = title;
-        this.description = description;
+        if(title != null)
+            this.title = title;
+        if(description != null)
+            this.description = description;
+        if (position == "bottom" || position == "top") {
+            this.position = position;
+        } else {
+            console.log("Error: position must be 'top' or 'bottom', not '" + position + "'");
+        }
     }
 }
