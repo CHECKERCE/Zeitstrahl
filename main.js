@@ -58,6 +58,7 @@ scale = 1;
 minScale = 1;
 maxScale = 10;
 
+const snapDistance = 30;
 function update() {
     //move the timeline with the mouse
     if (mouse.down) {
@@ -88,8 +89,19 @@ function update() {
         }
     }
 
-    //todo: correct position after zooming
-    
+    //smoothly snap the timeline back to the center
+    if (! mouse.down) {
+        if (Math.abs(x) < snapDistance) {x *= 0.9;}
+        if (Math.abs(y) < snapDistance) {y *= 0.9;}
+
+        if (Math.abs(x) < 1) {x = 0;}
+        if (Math.abs(y) < 1) {y = 0;}
+    }
+
+    //todo: correct the position of the timeline when zooming so that the mouse is still over the same point
+
+
+
 
 
     zeitstrahl.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
