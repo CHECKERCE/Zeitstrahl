@@ -51,7 +51,13 @@ anchor = null;
 
 lastFrameMouseDown = false;
 
-dataPointSize = 10;
+dataPointSizeNormal = 10;
+dataPointSizeHover = 15;
+dataPointSizeGoal = dataPointSizeNormal;
+dataPointSize = dataPointSizeNormal;
+
+hoverIndex = -1;
+
 verticalLineSize = 20;
 
 fontSize_title = 20;
@@ -66,6 +72,11 @@ colors = {
     year: 'white',
     month: 'white',
     day: 'white'
+}
+
+strokeWidth = {
+    horizontalLine: 2,
+    verticalLine: 1
 }
 
 months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
@@ -131,8 +142,6 @@ function update() {
         lastDateGoal = new Date(lastDate.getTime() + difference * 0.01);
     }
 
-
-
     //zoom in and out with the mouse wheel
     if (mouse.scroll != 0) {
         let difference = lastDate - firstDate;
@@ -150,6 +159,10 @@ function update() {
     firstDate = new Date(firstDate.getTime() + differenceFirstDate / 10);
     lastDate = new Date(lastDate.getTime() + differenceLastDate / 10);
 
+    //move dataPointSize towards the goal
+    let differenceDataPointSize = dataPointSizeGoal - dataPointSize;
+    dataPointSize = dataPointSize + differenceDataPointSize / 10;
+
 
     mouse.scroll = 0;
     lastMousePosition.x = mouse.x;
@@ -160,17 +173,48 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //draw timeline between datapoints
-    for (let i = 0; i < dates.length - 1; i++) {
+    for (let i = -1; i <= dates.length - 1; i++) {
+        lineDistance = 5;
+        //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
         let positionPercentage1 = 0
-        if (i != 0) 
-            positionPercentage1 = (dates[i].date - firstDate) / (lastDate - firstDate);
+        let positionPercentage2 = canvas.width;
+        
+        if (i >= 0) {
+            newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
+            positionPercentage1 = (newDate - firstDate) / (lastDate - firstDate);
+        }
+        if (i <= dates.length - 2) {
+            newDate2 = new Date(dates[i + 1].date.getFullYear(), dates[i + 1].date.getMonth() - 1, dates[i + 1].date.getDate());
+            positionPercentage2 = (newDate2 - firstDate) / (lastDate - firstDate);
+        }
+        
+        pSize1 = hoverIndex == i ? dataPointSize : dataPointSizeNormal;
+        pSize2 = hoverIndex == i + 1 ? dataPointSize : dataPointSizeNormal;
 
-        let positionPercentage2 = (dates[i + 1].date - firstDate) / (lastDate - firstDate);
+        if (i == -1) {
+            pSize1 = -10;
+        }
+
         ctx.beginPath();
-        ctx.moveTo((canvas.width * positionPercentage1) + 10, canvas.height / 2);
-        ctx.lineTo((canvas.width * positionPercentage2) - 10, canvas.height / 2);
+        ctx.moveTo((canvas.width * positionPercentage1) + pSize1 + lineDistance, canvas.height / 2);
+        ctx.lineTo((canvas.width * positionPercentage2) - pSize2 - lineDistance, canvas.height / 2);
         ctx.strokeStyle = colors.timeline;
+        ctx.lineWidth = strokeWidth.horizontalLine;
         ctx.stroke();
+
+        //draw a quatert circle around the datapoint
+        ctx.beginPath();
+        ctx.arc(canvas.width * positionPercentage2, canvas.height / 2, pSize2 + lineDistance, Math.PI / 2, Math.PI);
+        ctx.strokeStyle = colors.timeline;
+        ctx.lineWidth = strokeWidth.horizontalLine;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(canvas.width * positionPercentage2, canvas.height / 2, pSize2 + lineDistance, Math.PI * 3 / 2, 0);
+        ctx.strokeStyle = colors.timeline;
+        ctx.lineWidth = strokeWidth.horizontalLine;
+        ctx.stroke();
+
     }
 
 
@@ -186,6 +230,7 @@ function draw() {
         ctx.moveTo(canvas.width * positionPercentage, canvas.height / 2 - verticalLineSize);
         ctx.lineTo(canvas.width * positionPercentage, canvas.height / 2 + verticalLineSize);
         ctx.strokeStyle = colors.year;
+        ctx.lineWidth = strokeWidth.verticalLine;
         ctx.stroke();
 
         //draw the year
@@ -200,13 +245,14 @@ function draw() {
     //if the scale is large enough, draw vertical lines for each month also draw the month if the scale is large enough
     if (difference < 6000 * 60 * 60 * 24 * 30 * 12) {
         let month = 0;
-        while (month < 12 * (dates[dates.length - 1].date.getFullYear() - dates[0].date.getFullYear())) {
+        while (month < 12 * (lastDate.getFullYear() - firstDate.getFullYear() + 1)) {
             //dont draw a line for the first month of the year
             if (month % 12 != 0) {
-                positionPercentage = (new Date(dates[0].date.getFullYear(), month, 1) - firstDate) / difference;
+                positionPercentage = (new Date(firstDate.getFullYear(), month, 1) - firstDate) / difference;
                 ctx.beginPath();
                 ctx.moveTo(canvas.width * positionPercentage, canvas.height / 2 - verticalLineSize / 2);
                 ctx.lineTo(canvas.width * positionPercentage, canvas.height / 2 + verticalLineSize / 2);
+                ctx.lineWidth = strokeWidth.verticalLine;
                 ctx.stroke();
 
                 //draw the month
@@ -236,6 +282,7 @@ function draw() {
                     ctx.beginPath();
                     ctx.moveTo(canvas.width * positionPercentage, canvas.height / 2 - verticalLineSize / 4);
                     ctx.lineTo(canvas.width * positionPercentage, canvas.height / 2 + verticalLineSize / 4);
+                    ctx.lineWidth = strokeWidth.verticalLine;
                     ctx.stroke();
 
                     //draw the day
@@ -260,7 +307,8 @@ function draw() {
         newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
         positionPercentage = (newDate - firstDate) / difference;
         ctx.beginPath();
-        ctx.arc(canvas.width * positionPercentage, canvas.height / 2, dataPointSize, 0, 2 * Math.PI);
+        pSize = hoverIndex == i ? dataPointSize : dataPointSizeNormal;
+        ctx.arc(canvas.width * positionPercentage, canvas.height / 2, pSize, 0, 2 * Math.PI);
         ctx.fillStyle = colors.datapoint;
         ctx.fill();
 
@@ -273,6 +321,7 @@ function draw() {
 
     // if the mouse is over a datapoint, draw it's description and title on the top of the screen
     d = null;
+    hovering = false;
     for (let i = 0; i < dates.length; i++) {
         //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
         newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
@@ -283,11 +332,17 @@ function draw() {
             mouse.y > canvas.height / 2 - dataPointSize &&
             mouse.y < canvas.height / 2 + dataPointSize) {
             d = dates[i];
+            hovering = true;
+            hoverIndex = i;
         }
     }
     descriptionElement.innerHTML = d == null ? "" : d.description;
     titleElement.innerHTML = d == null ? "" : d.title;
 
+    dataPointSizeGoal = hovering ? dataPointSizeHover : dataPointSizeNormal;
+    if (!hovering) {
+        hoverIndex = -1;
+    }
     window.requestAnimationFrame(draw);
 }
 
