@@ -3,6 +3,7 @@ body {
     overflow: hidden;
     padding: 0px;
     margin: 0px;
+    background-color: #1e1e1e;
 }
 
 #descriptionDiv {
@@ -11,4 +12,9 @@ body {
     left: 50%;
     transform: translate(-50%, 0);
     font-size: 2em;
+    color: white;
+}
+
+#canvas {
+    background-color: #1e1e1e;
 }
