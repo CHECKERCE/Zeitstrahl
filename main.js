@@ -104,10 +104,42 @@ function update() {
     mouse.scroll = 0;
 }
 
+dates = [];
+
+
+dates.push( new datapoint(new Date(2001, 4, 12), 'test1', 'test1'));
+dates.push( new datapoint(new Date(2002, 9, 12), 'Julian', 'An diesem tag wurde Julian geboren'));
+dates.push( new datapoint(new Date(2008, 9, 12), 'saaas', 'An diesem tag war das datum 12.09.2008')); 
+dates.push( new datapoint(new Date(2020, 1, 1), 'deine mom', 'tolle beschreibung alla'));
+dates.push( new datapoint(new Date(2022, 2, 10), 'letztes datum', 'dies ist das letzte test datum'));
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //draw the timeline image
-    ctx.drawImage(zeitstrahl, x, y, canvas.width * scale, (canvas.width / 2.687) * scale);
+    //ctx.drawImage(zeitstrahl, x, y, canvas.width * scale, (canvas.width / 2.687) * scale);
+
+    //draw timeline
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height / 2);
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+
+    //draw datapoints
+    //calculate difference between the first and last date
+    let firstDate = dates[0].date - 10000000000;    //subtract 10000000000 to make sure the first datapoint is not on the edge of the timeline
+    let lastDate = dates[dates.length - 1].date - -10000000000; //add 10000000000 for the same reason. double minus to make it positive. + doesnt work bc javascript is stupid and doesnt know how to add numbers and strings :/
+    let difference = lastDate - firstDate;
+
+    //draw each datapoint on the timeline based on its date
+    for (let i = 0; i < dates.length; i++) {
+        positionPercentage = (dates[i].date - firstDate) / difference;
+        ctx.beginPath();
+        ctx.arc(canvas.width * positionPercentage + x, canvas.height / 2, 10, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+    
+
+    
     window.requestAnimationFrame(draw);
 }
 
