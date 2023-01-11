@@ -1,3 +1,14 @@
+canvas = document.getElementById('canvas');
+ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', function() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
 mouse = {
     x: 0,
     y: 0,
@@ -44,6 +55,9 @@ lastFrameMouseDown = false;
 
 scale = 1;
 
+minScale = 1;
+maxScale = 10;
+
 function update() {
     //move the timeline with the mouse
     if (mouse.down) {
@@ -58,29 +72,36 @@ function update() {
         lastFrameMouseDown = false;
     }
 
-    zeitstrahlAnker = zeitstrahl.getBoundingClientRect();
+    if (x < -canvas.width * scale) {x = -canvas.width * scale;}
+    if (x > canvas.width * scale) {x = canvas.width * scale;}
+    if (y < -canvas.height * scale) {y = -canvas.height * scale;}
+    if (y > canvas.height * scale) {y = canvas.height * scale;}
 
-    mouseOnZeitstrahlX = mouse.x - zeitstrahlAnker.left;
-    mouseOnZeitstrahlY = mouse.y - zeitstrahlAnker.top;
-
-    scale += -mouse.scroll / 1000;
-    if (scale < 0.1) {
-        scale = 0.1;
+    //zoom the timeline with the mouse wheel
+    if (mouse.scroll != 0) {
+        scale -= mouse.scroll / 1000;
+        if (scale < minScale) {
+            scale = minScale;
+        }
+        if (scale > maxScale) {
+            scale = maxScale;
+        }
     }
 
-    zeitstrahlAnker = zeitstrahl.getBoundingClientRect();
-    mouseOnZeitstrahlXNew = mouse.x - zeitstrahlAnker.left;
-    mouseOnZeitstrahlYNew = mouse.y - zeitstrahlAnker.top;
-
-    x += mouseOnZeitstrahlX - mouseOnZeitstrahlXNew;
-    y += mouseOnZeitstrahlY - mouseOnZeitstrahlYNew;
-
-
-    //reset scroll
-    mouse.scroll = 0;
+    //todo: correct position after zooming
     
 
+
     zeitstrahl.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
+    mouse.scroll = 0;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //draw the timeline image
+    ctx.drawImage(zeitstrahl, x, y, canvas.width * scale, (canvas.width / 2.687) * scale);
+    window.requestAnimationFrame(draw);
 }
 
 setInterval(update, 1000 / 60);
+draw();
