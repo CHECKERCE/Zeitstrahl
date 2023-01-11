@@ -56,20 +56,26 @@ lastFrameMouseDown = false;
 scale = 1;
 
 minScale = 1;
-maxScale = 10;
+maxScale = 1000;
 
 dataPointSize = 10;
 verticalLineSize = 20;
 
 fontSize_title = 20;
 fontSize_year = 20;
+fontSize_month = 15;
+fontSize_day = 10;
 
 colors = {
     datapoint: 'red',
     verticalLine: 'black',
     title: 'black',
-    year: 'black'
+    year: 'black',
+    month: 'black',
+    day: 'black'
 }
+
+months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
 titleElement = document.getElementById('title');
 descriptionElement = document.getElementById('description');
@@ -138,10 +144,13 @@ function draw() {
     ctx.lineTo(canvas.width, canvas.height / 2);
     ctx.stroke();
 
-    //draw datapoints
     //calculate difference between the first and last date
-    let firstDate = dates[0].date - 20000000000;    //subtract 20000000000 to make sure the first datapoint is not on the edge of the timeline
-    let lastDate = dates[dates.length - 1].date - -20000000000; //add 20000000000 for the same reason. double minus to make it positive. + doesnt work bc javascript is stupid and doesnt know how to add numbers and strings :/
+    let firstDate = dates[0].date;
+    //substract 1 year from the first date to make sure the first datapoint is not on the edge of the timeline
+    firstDate = new Date(firstDate.getFullYear() - 1, firstDate.getMonth(), firstDate.getDate());
+    let lastDate = dates[dates.length - 1].date;
+    // add one year to the last date to make sure the last datapoint is not on the edge of the timeline
+    lastDate = new Date(lastDate.getFullYear() + 1, lastDate.getMonth(), lastDate.getDate());
     let difference = lastDate - firstDate;
 
 
@@ -152,7 +161,7 @@ function draw() {
     let year = dates[0].date.getFullYear();
     let positionPercentage = 0;
     let yOffset = 0;
-    while (year <= dates[dates.length - 1].date.getFullYear()) {
+    while (year <= lastDate.getFullYear()){
         positionPercentage = (new Date(year, 0, 1) - firstDate) / difference;
         ctx.beginPath();
         ctx.moveTo(canvas.width * positionPercentage + x, canvas.height / 2 - verticalLineSize);
@@ -168,12 +177,70 @@ function draw() {
         year++;
     }
 
+    //if the scale is large enough, draw vertical lines for each month also draw the month if the scale is large enough
+    if (scale > 5) {
+        let month = 0;
+        while (month < 12 * (dates[dates.length - 1].date.getFullYear() - dates[0].date.getFullYear())) {
+            //dont draw a line for the first month of the year
+            if (month % 12 != 0) {
+                positionPercentage = (new Date(dates[0].date.getFullYear(), month, 1) - firstDate) / difference;
+                ctx.beginPath();
+                ctx.moveTo(canvas.width * positionPercentage + x, canvas.height / 2 - verticalLineSize / 2);
+                ctx.lineTo(canvas.width * positionPercentage + x, canvas.height / 2 + verticalLineSize / 2);
+                ctx.stroke();
+
+                //draw the month
+                if (scale > 10) {
+                    ctx.font = fontSize_month + "px Arial";
+                    yOffset = verticalLineSize / 2 + fontSize_month + 5;
+                    ctx.fillStyle = colors.month;
+                    ctx.fillText(months[month % 12], canvas.width * positionPercentage + x - ((fontSize_month / 5) * months[month % 12].length), canvas.height / 2 + yOffset);
+                }
+            }
+            month++;
+        }
+    }
+
+    //if the scale is large enough, draw vertical lines for each day, keep in mind that each month has a different amount of days also draw the day if the scale is large enough
+    if (scale > 50) {
+        let month = 0;
+        while (month < 12 * (dates[dates.length - 1].date.getFullYear() - dates[0].date.getFullYear())) {
+            let daysInMonth = new Date(dates[0].date.getFullYear(), month + 1, 0).getDate();
+            let day = 0;
+            console.log(daysInMonth);
+            while (day < daysInMonth) {
+                //dont draw a line for the first day of the month
+                if (day != 0) {
+                    //add one day to the date so the line is drawn at the end of the day
+                    positionPercentage = (new Date(dates[0].date.getFullYear(), month, day + 1) - firstDate) / difference;
+                    ctx.beginPath();
+                    ctx.moveTo(canvas.width * positionPercentage + x, canvas.height / 2 - verticalLineSize / 4);
+                    ctx.lineTo(canvas.width * positionPercentage + x, canvas.height / 2 + verticalLineSize / 4);
+                    ctx.stroke();
+
+                    //draw the day
+                    if (scale > 100) {
+                        ctx.font = fontSize_day + "px Arial";
+                        yOffset = verticalLineSize / 4 + fontSize_day;
+                        ctx.fillStyle = colors.day;
+                        ctx.fillText(day + 1, canvas.width * positionPercentage + x - ((fontSize_day / 5) * (day + 1).toString().length), canvas.height / 2 + yOffset);   
+                    }
+                }
+                day++;
+            }
+            month++;
+        }    
+    }
+
+
 
     //draw each datapoint on the timeline based on its date
     for (let i = 0; i < dates.length; i++) {
-        positionPercentage = (dates[i].date - firstDate) / difference;
+        //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
+        newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
+        positionPercentage = (newDate - firstDate) / difference;
         ctx.beginPath();
-        ctx.arc(canvas.width * positionPercentage + x - dataPointSize / 2, canvas.height / 2, dataPointSize, 0, 2 * Math.PI);
+        ctx.arc(canvas.width * positionPercentage + x, canvas.height / 2, dataPointSize, 0, 2 * Math.PI);
         ctx.fillStyle = colors.datapoint;
         ctx.fill();
 
@@ -187,7 +254,9 @@ function draw() {
     // if the mouse is over a datapoint, draw it's description and title on the top of the screen
     d = null;
     for (let i = 0; i < dates.length; i++) {
-        positionPercentage = (dates[i].date - firstDate) / difference;
+        //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
+        newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
+        positionPercentage = (newDate - firstDate) / difference;
         xPos = canvas.width * positionPercentage + x;
         if (mouse.x > xPos - dataPointSize && 
             mouse.x < xPos + dataPointSize && 
