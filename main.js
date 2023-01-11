@@ -2,6 +2,7 @@ mouse = {
     x: 0,
     y: 0,
     down: false,
+    scroll : 0
 }
 
 keys = [];
@@ -12,6 +13,10 @@ window.addEventListener('keydown', function(e) {
 
 window.addEventListener('keyup', function(e) {
     keys[e.keyCode] = false;
+});
+
+window.addEventListener('wheel', function(e) {
+    mouse.scroll = e.deltaY;
 });
 
 window.addEventListener('mousemove', function(e) {
@@ -40,6 +45,7 @@ lastFrameMouseDown = false;
 scale = 1;
 
 function update() {
+    //move the timeline with the mouse
     if (mouse.down) {
         if (!lastFrameMouseDown) {
             ankerX = mouse.x - x;
@@ -52,19 +58,14 @@ function update() {
         lastFrameMouseDown = false;
     }
 
-    up = keys[38];
-    down = keys[40];
-
     zeitstrahlAnker = zeitstrahl.getBoundingClientRect();
 
     mouseOnZeitstrahlX = mouse.x - zeitstrahlAnker.left;
     mouseOnZeitstrahlY = mouse.y - zeitstrahlAnker.top;
 
-    if (up) {
-        scale += 0.01;
-    }
-    if (down) {
-        scale -= 0.01;
+    scale += -mouse.scroll / 1000;
+    if (scale < 0.1) {
+        scale = 0.1;
     }
 
     zeitstrahlAnker = zeitstrahl.getBoundingClientRect();
@@ -75,10 +76,8 @@ function update() {
     y += mouseOnZeitstrahlY - mouseOnZeitstrahlYNew;
 
 
-    
-
-    
-
+    //reset scroll
+    mouse.scroll = 0;
     
 
     zeitstrahl.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
