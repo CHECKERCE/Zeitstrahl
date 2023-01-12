@@ -4,17 +4,41 @@ body {
     padding: 0px;
     margin: 0px;
     background-color: #1e1e1e;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #descriptionDiv {
     position: fixed;
     top: 10;
     left: 50%;
+    height: 30%;
     transform: translate(-50%, 0);
     font-size: 2em;
     color: white;
+    text-overflow: ellipsis;
 }
 
 #canvas {
     background-color: #1e1e1e;
+}
+
+#date{
+    margin: 5px;
+    font-size: 1em;
+    color: lightblue;
+    text-decoration: underline;
+    font-style: italic;
+}
+
+#title{
+    margin: 10px;
+    font-size: 1.5em;
+    color: white;
+    font-weight: bold;
+}
+
+#description{
+    margin: 10px;
+    font-size: 1em;
+    color: white;
 }
