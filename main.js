@@ -140,13 +140,13 @@ function update() {
     //move the timeline with the arrow keys
     if (keys[37]) {
         let difference = lastDate - firstDate;
-        firstDateGoal = new Date(firstDate.getTime() - difference * 0.01);
-        lastDateGoal = new Date(lastDate.getTime() - difference * 0.01);
+        firstDateGoal = new Date(firstDate.getTime() - difference * 0.1);
+        lastDateGoal = new Date(lastDate.getTime() - difference * 0.1);
     }
     if (keys[39]) {
         let difference = lastDate - firstDate;
-        firstDateGoal = new Date(firstDate.getTime() + difference * 0.01);
-        lastDateGoal = new Date(lastDate.getTime() + difference * 0.01);
+        firstDateGoal = new Date(firstDate.getTime() + difference * 0.1);
+        lastDateGoal = new Date(lastDate.getTime() + difference * 0.1);
     }
 
     //zoom in and out with the mouse wheel
