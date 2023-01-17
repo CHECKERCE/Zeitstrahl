@@ -295,7 +295,7 @@ function draw() {
         while (month < 12 * (lastDate.getFullYear() - firstDate.getFullYear() + 1)) {
             //dont draw a line for the first month of the year
             if (month % 12 != 0) {
-                positionPercentage = (new Date(firstDate.getFullYear(), month, 1) - firstDate) / difference;
+                positionPercentage = (new Date(firstDate.getFullYear(), month, 1) - firstDate) / dateRange;
                 ctx.beginPath();
                 ctx.moveTo(canvas.width * positionPercentage, canvas.height / 2 - verticalLineSize / 2);
                 ctx.lineTo(canvas.width * positionPercentage, canvas.height / 2 + verticalLineSize / 2);
@@ -320,7 +320,6 @@ function draw() {
         while (month < 12 * (dates[dates.length - 1].date.getFullYear() - dates[0].date.getFullYear())) {
             let daysInMonth = new Date(dates[0].date.getFullYear(), month + 1, 0).getDate();
             let day = 0;
-            console.log(daysInMonth);
             while (day < daysInMonth) {
                 //dont draw a line for the first day of the month
                 if (day != 0) {
