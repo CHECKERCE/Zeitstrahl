@@ -1,0 +1,136 @@
+[
+	{
+		"title": "Ende des Zweiten Weltkrieges in Europa und Asien - Gründung der UNO",
+		"year": 1945,
+		"heat": -3
+	},
+	{
+		"title": "Truman-Doktrin und Marshall-Plan",
+		"year": 1947,
+		"heat": 4
+	},
+	{
+		"title": "Beginn der Berlin-Blockade",
+		"year": 1948,
+		"heat": 6
+	},
+	{
+		"title": "Gründung der NATO - Gründung der Bundesrepublik und der DDR",
+		"year": 1949,
+		"heat": 8
+	},
+	{
+		"title": "Ausbruch des Korea-Krieges",
+		"year": 1950,
+		"heat": 9
+	},
+	{
+		"title": "Tod Stalins - Waffenstillstand in Korea",
+		"year": 1953,
+		"heat": 6
+	},
+	{
+		"title": "Genfer Gipfelkonferenz der Siegermächte",
+		"year": 1955,
+		"heat": -1
+	},
+	{
+		"title": "\"Doppelkriese\" von Ungarn und Suez",
+		"year": 1956,
+		"heat": 5
+	},
+	{
+		"title": "Sputnik-Start",
+		"year": 1957,
+		"heat": 6
+	},
+	{	"title": "Berlin-Ultimatum Chruschtschows",
+		"year": 1958,
+		"heat": 7
+	},
+	{
+		"title": "Gipfeltreffen von Camp David (Eisenhower/Chruschtschow)",
+		"year": 1959,
+		"heat": -2
+	},
+	{
+		"title": "Bau der Berliner Mauer",
+		"year": 1961,
+		"heat": 2
+	},
+	{
+		"title": "Kuba-Krise",
+		"year": 1962,
+		"heat": 10
+	},
+	{
+		"title": "Atomstopp-Abkommen - Einrichtung des \"Heißen Drahtes \"",
+		"year": 1963,
+		"heat": -4
+	},
+	{
+		"title": "Kernwaffensperrvertrag - Ende des \"Prager Frühlings\"",
+		"year": 1968,
+		"heat": -1
+	},
+	{
+		"title": "Berlin-Abkommen",
+		"year": 1971,
+		"heat": -5
+	},
+	{
+		"title": "SALT-I-Vertrag",
+		"year": 1972,
+		"heat": -7
+	},
+	{
+		"title": "Schlussakte der KSZE in Helsinki",
+		"year": 1975,
+		"heat": -8
+	},
+	{
+		"title": "NATO-Doppelbeschluss - sowjetischer Einmarsch in Afghanistan",
+		"year": 1979,
+		"heat": 7
+	},
+	{
+		"title": "Kriegsrecht in Polen - Handelssanktionen der USA gegen Sowjetunion",
+		"year": 1981,
+		"heat": 8
+	},
+	{
+		"title": "Abbruch aller Rüstungskontrollverhandlungen",
+		"year": 1983,
+		"heat": 9
+	},
+	{
+		"title": "Gipfeltreffen in Genf (Reagan/Gorbatschow)",
+		"year": 1985,
+		"heat": -3
+	},
+	{
+		"title": "Gipfeltreffen in Reykjavik (Reagan/Gorbatschow)",
+		"year": 1986,
+		"heat": -4
+	},
+	{
+		"title": "Einigung in Genf über Abbau von Mittelstreckenraketen - Unterzeichnung des INF-Vertrages beim Gipfeltreffen in Washington (Reagan/Gorbatschow)",
+		"year": 1987,
+		"heat": -7
+	},
+	{
+		"title": "Gipfeltreffen in Moskau (Reagan/Gorbatschow) - Fortsetzung des sowjetischen Rückzugs aus Afghanistan - Abbau von Mittelstreckenraketen in Mitteleuropa",
+		"year": 1988,
+		"heat": -8
+	},
+	{
+		"title": "Vertrag über die endgültige Regelung in Bezug auf Deutschland als Abschluss der 2+4-Verhandlungen",
+		"year": 1990,
+		"heat": -9
+	},
+	{
+		"title": "Auflösung der Sowjetunion",
+		"year": 1991,
+		"heat": -10
+	}
+]

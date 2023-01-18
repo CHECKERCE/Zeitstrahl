@@ -66,6 +66,9 @@ fontSize_year = 20;
 fontSize_month = 15;
 fontSize_day = 10;
 
+const minZoom = 20000 * 60 * 60 * 24 * 365;
+const maxZoom = 100 * 60 * 60 * 24 * 365;
+
 colors = {
     datapoint: 'red',
     datapointHover: 'cyan',
@@ -73,7 +76,9 @@ colors = {
     title: 'white',
     year: 'white',
     month: 'white',
-    day: 'white'
+    day: 'white',
+    cold: [0, 0, 255],
+    hot: [255, 0, 0]
 }
 
 strokeWidth = {
@@ -89,27 +94,66 @@ descriptionElement = document.getElementById('description');
 
 dates = [];
 
-dates.push(new datapoint(new Date(2001, 4, 12), 'test1', 'test1'));
-dates.push(new datapoint(new Date(2002, 9, 12), 'Julian', 'An diesem tag wurde Julian geboren'));
-dates.push(new datapoint(new Date(2008, 9, 12), '| laaaaangerrrr Titelllll |', 'und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. und auch eine ganz lange beschreibung. ', "bottom"));
-dates.push(new datapoint(new Date(2020, 1, 1), 'deine mom', 'tolle beschreibung alla'));
-dates.push(new datapoint(new Date(2022, 2, 10), 'letztes datum', 'dies ist das letzte test datum'));
+//load data from json file, note that the data has to be sorted and only the year is given, not the exact date
+fetch('timeline.json')
+    .then(response => response.json())
+    .then(data => {
+        //sort the data by date
+        data.sort((a, b) => {
+            return a.year - b.year;
+        });
+        //convert the data to a format that is easier to work with
+        data.forEach(element => {
+            dates.push(new datapoint(new Date(element.year, 0, 1), element.title, element.description, element.heat));
+        });
+    }).then(() => {
+        init();
+    });
 
-//calculate difference between the first and last date
-let firstDate = dates[0].date;
-//substract 1 year from the first date to make sure the first datapoint is not on the edge of the timeline
-firstDate = new Date(firstDate.getFullYear() - 1, firstDate.getMonth(), firstDate.getDate());
-let lastDate = dates[dates.length - 1].date;
-// add one year to the last date to make sure the last datapoint is not on the edge of the timeline
-lastDate = new Date(lastDate.getFullYear() + 1, lastDate.getMonth(), lastDate.getDate());
+let firstDate;
+let lastDate;
+let dateRange;
 
-firstDateGoal = firstDate;
-lastDateGoal = lastDate;
+let minHeat;
+let maxHeat;
+let heatRange = 0;
 
-let dateRange = lastDate - firstDate;
 
-const minZoom = 20000 * 60 * 60 * 24 * 365;
-const maxZoom = 100 * 60 * 60 * 24 * 365;
+function init() {
+    //calculate difference between the first and last date
+    firstDate = dates[0].date;
+    //substract 1 year from the first date to make sure the first datapoint is not on the edge of the timeline
+    firstDate = new Date(firstDate.getFullYear() - 1, firstDate.getMonth(), firstDate.getDate());
+    lastDate = dates[dates.length - 1].date;
+    // add one year to the last date to make sure the last datapoint is not on the edge of the timeline
+    lastDate = new Date(lastDate.getFullYear() + 1, lastDate.getMonth(), lastDate.getDate());
+
+    //calculate the range of the heat values which can be negative and positive
+    minHeat = 0;
+    maxHeat = 0;
+    dates.forEach(element => {
+        console.log(element.heat)
+        if (element.heat < minHeat) {
+            minHeat = element.heat;
+        }
+        if (element.heat > maxHeat) {
+            maxHeat = element.heat;
+        }
+    });
+    console.log(minHeat, maxHeat)
+    heatRange = maxHeat - minHeat;
+    
+    
+    firstDateGoal = firstDate;
+    lastDateGoal = lastDate;
+
+    dateRange = lastDate - firstDate;
+
+
+    setInterval(update, 1000 / 60);
+    draw();
+}
+
 function update() {
     dateRange = lastDate - firstDate;
 
@@ -352,10 +396,22 @@ function draw() {
         //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
         newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
         positionPercentage = (newDate - firstDate) / dateRange;
+        let pSize = 0;
+        let pColor = "";
+        if (hoverIndex == i) {
+            pSize = dataPointSize;
+        } else {
+            heatNormal = (dates[i].heat - minHeat) / heatRange;
+
+            pSize = dataPointSizeNormal * (heatNormal + 0.3);
+            
+            //interpolate between colors.cold and colors.hot based on the heat of the datapoint
+            pColor = "rgb(" + Math.round(colors.cold[0] + (colors.hot[0] - colors.cold[0]) * heatNormal) + "," + Math.round(colors.cold[1] + (colors.hot[1] - colors.cold[1]) * heatNormal) + "," + Math.round(colors.cold[2] + (colors.hot[2] - colors.cold[2]) * heatNormal) + ")";
+        }
+
         ctx.beginPath();
-        pSize = hoverIndex == i ? dataPointSize : dataPointSizeNormal;
         ctx.arc(canvas.width * positionPercentage, canvas.height / 2, pSize, 0, 2 * Math.PI);
-        ctx.fillStyle = i == hoverIndex ? colors.datapointHover : colors.datapoint;
+        ctx.fillStyle = i == hoverIndex ? colors.datapointHover : pColor;
         ctx.fill();
 
         //draw the title of the datapoint
@@ -366,6 +422,3 @@ function draw() {
     }
     window.requestAnimationFrame(draw);
 }
-
-setInterval(update, 1000 / 60);
-draw();
