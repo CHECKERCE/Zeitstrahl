@@ -54,14 +54,6 @@ let anchor = null;
 
 let lastFrameMouseDown = false;
 
-let dataPointSizeNormal = 10;
-let dataPointSizeHover = 15;
-let dataPointSizeClick = 20;
-let dataPointSizeGoal = dataPointSizeNormal;
-let dataPointSize = dataPointSizeNormal;
-
-let dataPointClicking = false;
-
 let verticalLineSize = 20;
 let lineDistance = 5;
 
@@ -88,9 +80,7 @@ colors = {
     title: 'white',
     year: 'white',
     month: 'white',
-    day: 'white',
-    cold: [0, 0, 255],
-    hot: [255, 0, 0]
+    day: 'white'
 }
 
 strokeWidth = {
@@ -145,6 +135,11 @@ function init() {
         }
     });
     heatRange = maxHeat - minHeat;
+
+    //set heatNormalized for each datapoint
+    dates.forEach(element => {
+        element.heatNormalized = (element.heat - minHeat) / heatRange;
+    });
 
     firstDateGoal = firstDate;
     lastDateGoal = lastDate;
@@ -225,44 +220,43 @@ function update() {
     firstDate = new Date(firstDate.getTime() + differenceFirstDate / 10);
     lastDate = new Date(lastDate.getTime() + differenceLastDate / 10);
 
-    //move dataPointSize towards the goal
-    let differenceDataPointSize = dataPointSizeGoal - dataPointSize;
-    dataPointSize = dataPointSize + differenceDataPointSize / 10;
-
     // if the mouse is over a datapoint, draw it's description and title on the top of the screen
-    d = null;
+    hoverDate = null;
     for (let i = 0; i < dates.length; i++) {
+        let d = dates[i];
         //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
-        newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
+        newDate = new Date(d.date.getFullYear(), d.date.getMonth() - 1, d.date.getDate());
         positionPercentage = (newDate - firstDate) / dateRange;
         xPos = canvas.width * positionPercentage;
-        if (mouse.x > xPos - dataPointSize &&
-            mouse.x < xPos + dataPointSize &&
-            mouse.y > canvas.height / 2 - dataPointSize &&
-            mouse.y < canvas.height / 2 + dataPointSize) {
+        if (mouse.x > xPos - d.size &&
+            mouse.x < xPos + d.size &&
+            mouse.y > canvas.height / 2 - d.size &&
+            mouse.y < canvas.height / 2 + d.size) {
 
-            dates[i].hovering = true;
-            d = dates[i];
+            d.hovering = true;
+            hoverDate = d;
             if (mouse.down) {
                 clearClicked();
-                dates[i].clicked = true;
+                d.clicked = true;
             } else {
-                c = dates[i].clicked;
+                c = d.clicked;
                 clearClicked();
-                dates[i].clicked = c;
+                d.clicked = c;
             }
         } else {
-            dates[i].hovering = false;
+            d.hovering = false;
         }
     }
 
-    for (let i = 0; i < dates.length; i++) {
-        if (dates[i].clicked) {
-            d = dates[i];
+    dates.forEach(element => {
+        if (element.clicked) {
+            hoverDate = element;
         }
-    }
+    });
 
-    updateTitleDescription(d);
+
+
+    updateTitleDescription(hoverDate);
 
     mouse.scroll = 0;
     lastMousePosition.x = mouse.x;
@@ -436,6 +430,9 @@ function drawVerticalLines() {
 }
 
 function drawDatapoints() {
+    //store the positions of the titles later so we can avoid overlapping
+    let titlePositions = [];
+
     for (let i = 0; i < dates.length; i++) {
         //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
         newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
@@ -461,16 +458,39 @@ function drawDatapoints() {
             yOffset = 20 + verticalLineSize + fontSize_title / 2 + fontSize_year / 2 + 10;
         }
 
-        ctx.fillStyle = colors.title;
-        width = dates[i].title.length * (fontSize_title / 2.5);
+        width = dates[i].title.length * (fontSize_title / 2);
+        height = fontSize_title / 2;
         let x = canvas.width * positionPercentage - width / 2;
         let y = canvas.height / 2 + yOffset;
+
+        //check if the title overlaps with another title
+        for (let j = 0; j < titlePositions.length; j++) {
+            let title = titlePositions[j];
+            if (x + width > title.x && x < title.x + title.width && y + height > title.y && y < title.y + title.height) {
+                //if the title overlaps, move it to the left or right
+                if (top) {
+                    y = title.y - height - 20;
+                } else {
+                    y = title.y + title.height + 20;
+                }
+            }
+        }
+
+        ctx.fillStyle = colors.title;
         ctx.fillText(dates[i].title, x, y);
+        
+        //add the position of the title to the array
+        titlePositions.push({
+            x: x,
+            y: y,
+            width: width,
+            height: height
+        });
 
         //draw a line from the datapoint to the title
         ctx.beginPath();
         ctx.moveTo(canvas.width * positionPercentage, canvas.height / 2 + (pSize + lineDistance) * (top ? -1 : 1));
-        ctx.lineTo(canvas.width * positionPercentage, canvas.height / 2 + yOffset + ((fontSize_title / 2 - 15) * (top ? -1 : 4)));
+        ctx.lineTo(canvas.width * positionPercentage, y - ((top ? -height : height) / 2));
         ctx.lineWidth = strokeWidth.timeline;
         ctx.strokeStyle = colors.timeline;
         ctx.stroke();
