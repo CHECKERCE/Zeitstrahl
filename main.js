@@ -132,7 +132,6 @@ function init() {
     minHeat = 0;
     maxHeat = 0;
     dates.forEach(element => {
-        console.log(element.heat)
         if (element.heat < minHeat) {
             minHeat = element.heat;
         }
@@ -140,7 +139,6 @@ function init() {
             maxHeat = element.heat;
         }
     });
-    console.log(minHeat, maxHeat)
     heatRange = maxHeat - minHeat;
     
     
