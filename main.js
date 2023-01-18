@@ -1,9 +1,12 @@
+//#region canvas setup
 let canvas = document.getElementById('canvas');
 let ctx = canvas.getContext('2d');
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+//#endregion
 
+//#region event listeners
 window.addEventListener('resize', function () {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -42,7 +45,9 @@ window.addEventListener('mousedown', function (e) {
 window.addEventListener('mouseup', function (e) {
     mouse.down = false;
 });
+//#endregion
 
+//#region variables
 let lastMousePosition = { x: 0, y: 0 };
 
 let anchor = null;
@@ -68,6 +73,14 @@ fontSize_day = 10;
 const minZoom = 20000 * 60 * 60 * 24 * 365;
 const maxZoom = 100 * 60 * 60 * 24 * 365;
 
+let firstDate;
+let lastDate;
+let dateRange;
+
+let minHeat;
+let maxHeat;
+let heatRange = 0;
+
 colors = {
     datapoint: 'red',
     datapointHover: 'cyan',
@@ -92,8 +105,9 @@ titleElement = document.getElementById('title');
 descriptionElement = document.getElementById('description');
 
 dates = [];
+//#endregion
 
-//load data from json file, note that the data has to be sorted and only the year is given, not the exact date
+//#region load data from json file
 fetch('timeline.json')
     .then(response => response.json())
     .then(data => {
@@ -108,15 +122,7 @@ fetch('timeline.json')
     }).then(() => {
         init();
     });
-
-let firstDate;
-let lastDate;
-let dateRange;
-
-let minHeat;
-let maxHeat;
-let heatRange = 0;
-
+//#endregion
 
 function init() {
     //calculate difference between the first and last date
@@ -289,7 +295,7 @@ function draw() {
 
 function drawTimeline() {
     //draw the line to the first datapoint
-    
+
     //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
     let d = dates[0];
     let newDate = new Date(d.date.getFullYear(), d.date.getMonth() - 1, d.date.getDate());
@@ -454,7 +460,7 @@ function drawDatapoints() {
         } else {
             yOffset = 20 + verticalLineSize + fontSize_title / 2 + fontSize_year / 2 + 10;
         }
-        
+
         ctx.fillStyle = colors.title;
         width = dates[i].title.length * (fontSize_title / 2.5);
         let x = canvas.width * positionPercentage - width / 2;
@@ -463,7 +469,7 @@ function drawDatapoints() {
 
         //draw a line from the datapoint to the title
         ctx.beginPath();
-        ctx.moveTo(canvas.width * positionPercentage, canvas.height / 2  + (pSize + lineDistance) * (top ? -1 : 1));
+        ctx.moveTo(canvas.width * positionPercentage, canvas.height / 2 + (pSize + lineDistance) * (top ? -1 : 1));
         ctx.lineTo(canvas.width * positionPercentage, canvas.height / 2 + yOffset + ((fontSize_title / 2 - 15) * (top ? -1 : 4)));
         ctx.lineWidth = strokeWidth.timeline;
         ctx.strokeStyle = colors.timeline;
