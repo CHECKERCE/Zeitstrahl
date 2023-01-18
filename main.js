@@ -224,10 +224,12 @@ function update() {
     hoverDate = null;
     for (let i = 0; i < dates.length; i++) {
         let d = dates[i];
-        positionPercentage = (d - firstDate) / dateRange;
+        //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
+        newDate = d.date;
+        positionPercentage = (newDate - firstDate) / dateRange;
         xPos = canvas.width * positionPercentage;
-        if (mouse.x > xPos - d.size &&
-            mouse.x < xPos + d.size &&
+        if (mouse.x > xPos - d.size - lineDistance &&
+            mouse.x < xPos + d.size + lineDistance &&
             mouse.y > canvas.height / 2 - d.size &&
             mouse.y < canvas.height / 2 + d.size) {
 
@@ -448,9 +450,9 @@ function drawDatapoints() {
             yOffset = 20 + verticalLineSize + fontSize_title / 2 + fontSize_year / 2 + 10;
         }
 
-        width = dates[i].title.length * (fontSize_title / 2);
+        width = dates[i].title.length * fontSize_title;
         height = fontSize_title / 2;
-        let x = canvas.width * positionPercentage - width / 2;
+        let x = canvas.width * positionPercentage - width / 4;
         let y = canvas.height / 2 + yOffset;
 
         //check if the title overlaps with another title
