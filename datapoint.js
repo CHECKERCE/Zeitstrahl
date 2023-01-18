@@ -27,6 +27,9 @@ class datapoint {
     sizeGoal = 10;
     clicked = false;
 
+    offset = 0;
+    offsetGoal = 0;
+
     _color = { r: 255, g: 0, b: 0 };
     get color() {
         if (this.hovering) {
@@ -56,6 +59,7 @@ class datapoint {
 
     update() {
         this.size += (this.sizeGoal - this.size) * 0.1;
+        this.offset += (this.offsetGoal - this.offset) * 0.1;
         this.color = {
             r: coldColor[0] + (hotColor[0] - coldColor[0]) * this.heatNormalized,
             g: coldColor[1] + (hotColor[1] - coldColor[1]) * this.heatNormalized,

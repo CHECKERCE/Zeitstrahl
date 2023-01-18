@@ -222,6 +222,7 @@ function update() {
 
     // if the mouse is over a datapoint, draw it's description and title on the top of the screen
     hoverDate = null;
+    let hover = false;
     for (let i = 0; i < dates.length; i++) {
         let d = dates[i];
         //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
@@ -235,6 +236,7 @@ function update() {
 
             d.hovering = true;
             hoverDate = d;
+            hover = true;
             if (mouse.down) {
                 clearClicked();
                 d.clicked = true;
@@ -254,9 +256,11 @@ function update() {
         }
     });
 
-
-
     updateTitleDescription(hoverDate);
+
+    if (mouse.down && !hover) {
+        clearClicked();
+    }
 
     mouse.scroll = 0;
     lastMousePosition.x = mouse.x;
@@ -427,8 +431,8 @@ function drawDatapoints() {
     let titlePositions = [];
 
     for (let i = 0; i < dates.length; i++) {
-        d = dates[i].date;
-        let positionPercentage = (d - firstDate) / dateRange;
+        d = dates[i];
+        let positionPercentage = (d.date - firstDate) / dateRange;
         let pSize = 0;
         pSize = dates[i].size;
         pColor = dates[i].color;
@@ -467,10 +471,6 @@ function drawDatapoints() {
                 }
             }
         }
-
-        ctx.fillStyle = colors.title;
-        ctx.fillText(dates[i].title, x, y);
-        
         //add the position of the title to the array
         titlePositions.push({
             x: x,
@@ -478,6 +478,13 @@ function drawDatapoints() {
             width: width,
             height: height
         });
+
+        d.offsetGoal = y;
+
+        y = d.offset;
+        
+        ctx.fillStyle = colors.title;
+        ctx.fillText(dates[i].title, x, y);
 
         //draw a line from the datapoint to the title
         ctx.beginPath();
