@@ -224,9 +224,7 @@ function update() {
     hoverDate = null;
     for (let i = 0; i < dates.length; i++) {
         let d = dates[i];
-        //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
-        newDate = new Date(d.date.getFullYear(), d.date.getMonth() - 1, d.date.getDate());
-        positionPercentage = (newDate - firstDate) / dateRange;
+        positionPercentage = (d - firstDate) / dateRange;
         xPos = canvas.width * positionPercentage;
         if (mouse.x > xPos - d.size &&
             mouse.x < xPos + d.size &&
