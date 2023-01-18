@@ -289,11 +289,8 @@ function draw() {
 
 function drawTimeline() {
     //draw the line to the first datapoint
-
-    //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
     let d = dates[0];
-    let newDate = new Date(d.date.getFullYear(), d.date.getMonth() - 1, d.date.getDate());
-    let positionPercentage = (newDate - firstDate) / (lastDate - firstDate);
+    let positionPercentage = (d.date - firstDate) / (lastDate - firstDate);
     let pSize = d.size;
     ctx.beginPath();
     ctx.moveTo(0, canvas.height / 2);
@@ -307,16 +304,12 @@ function drawTimeline() {
         let d2;
         let pSize1 = d.size
         let pSize2 = 0;
-
-        //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
-        let newDate = new Date(d.date.getFullYear(), d.date.getMonth() - 1, d.date.getDate());
-        let positionPercentage1 = (newDate - firstDate) / (lastDate - firstDate);
+        let positionPercentage1 = (d.date - firstDate) / (lastDate - firstDate);
 
         if (i < dates.length - 1) {
-            //same as above
             d2 = dates[i + 1];
-            newDate2 = new Date(d2.date.getFullYear(), d2.date.getMonth() - 1, d2.date.getDate());
-            positionPercentage2 = (newDate2 - firstDate) / (lastDate - firstDate);
+            d = d2.date;
+            positionPercentage2 = (d - firstDate) / (lastDate - firstDate);
             pSize2 = d2.size;
         } else {
             positionPercentage2 = 1;
@@ -434,9 +427,8 @@ function drawDatapoints() {
     let titlePositions = [];
 
     for (let i = 0; i < dates.length; i++) {
-        //idk why but the position of the datapoint is always drawn one month too far to the right, so i subtract one month from the date
-        newDate = new Date(dates[i].date.getFullYear(), dates[i].date.getMonth() - 1, dates[i].date.getDate());
-        let positionPercentage = (newDate - firstDate) / dateRange;
+        d = dates[i].date;
+        let positionPercentage = (d - firstDate) / dateRange;
         let pSize = 0;
         pSize = dates[i].size;
         pColor = dates[i].color;
